@@ -16,14 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <stdio.h>
-#include <sys/socket.h>
-//#include <bits/errno.h>
-#include <netdb.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include "main.h"
+#include <readline/readline.h>
+
+#include "rcon_packet.h"
 
 // https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
 
@@ -33,6 +29,23 @@ void cleanup(int exitno)
 {
 	if(sockfd >= 0) close(sockfd);
 	exit(exitno);
+}
+
+bool authenticate()
+{
+	struct rcon_packet p;
+
+	char *pwd = readline("Password: ");
+
+	p = rcon_crate_packet();
+	p.type = RCON_TYPE_SERVERDATA_AUTH;
+
+	// Set the password. If this field is larger than sz, set the last char to \0
+	uint32_t sz = sizeof(p.body);
+	memcpy(&p.body, pwd, sz);
+	p.body[sz-1] = '\0';
+
+	return false;
 }
 
 void loop()
@@ -85,6 +98,11 @@ int main(int argc, char *argv[])
 	if(sockfd < 0)
 	{
 		return -2;
+	}
+
+	if(!authenticate())
+	{
+		cleanup(EXIT_FAILURE);
 	}
 
 	loop();

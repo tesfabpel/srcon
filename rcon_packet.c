@@ -15,29 +15,24 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef SRCON_RCON_PACKET_H_H
-#define SRCON_RCON_PACKET_H_H
 
 #include "main.h"
+#include "rcon_packet.h"
 
-enum rcon_packet_type
+uint32_t id = 1;
+
+struct rcon_packet rcon_crate_packet()
 {
-	RCON_TYPE_SERVERDATA_AUTH = 3,
-	RCON_TYPE_SERVERDATA_AUTH_RESPONSE  = 2,
-	RCON_TYPE_SERVERDATA_EXECCOMMAND    = 2,
-	RCON_TYPE_SERVERDATA_RESPONSE_VALUE = 0
-};
+	struct rcon_packet p;
+	memset(&p, 0, sizeof(struct rcon_packet));
 
-struct rcon_packet
+	p.id = id++;
+
+	return p;
+}
+
+void rcon_prepare_packet(struct rcon_packet *p)
 {
-    int32_t size;
-    int32_t id;
-    enum rcon_packet_type type : sizeof(int32_t)*8;
-    char body[UINT16_MAX];
-	char nul;
-};
-
-struct rcon_packet rcon_crate_packet();
-void rcon_prepare_packet(struct rcon_packet *p);
-
-#endif //SRCON_RCON_PACKET_H_H
+	p->nul = '\0';
+	p->size = sizeof(*p) - sizeof(p->size);
+}

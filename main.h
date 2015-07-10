@@ -15,29 +15,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef SRCON_RCON_PACKET_H_H
-#define SRCON_RCON_PACKET_H_H
 
-#include "main.h"
+#ifndef SRCON_MAIN_H
+#define SRCON_MAIN_H
 
-enum rcon_packet_type
-{
-	RCON_TYPE_SERVERDATA_AUTH = 3,
-	RCON_TYPE_SERVERDATA_AUTH_RESPONSE  = 2,
-	RCON_TYPE_SERVERDATA_EXECCOMMAND    = 2,
-	RCON_TYPE_SERVERDATA_RESPONSE_VALUE = 0
-};
+#include <stdbool.h>
+#include <stdio.h>
+#include <sys/socket.h>
+//#include <bits/errno.h>
+#include <netdb.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
-struct rcon_packet
-{
-    int32_t size;
-    int32_t id;
-    enum rcon_packet_type type : sizeof(int32_t)*8;
-    char body[UINT16_MAX];
-	char nul;
-};
-
-struct rcon_packet rcon_crate_packet();
-void rcon_prepare_packet(struct rcon_packet *p);
-
-#endif //SRCON_RCON_PACKET_H_H
+#endif //SRCON_MAIN_H

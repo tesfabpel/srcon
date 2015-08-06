@@ -21,10 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 uint32_t id = 1;
 
+void rcon_init_packet(struct rcon_packet *p)
+{
+	memset(p, 0, sizeof(struct rcon_packet));
+}
+
 struct rcon_packet rcon_crate_packet()
 {
 	struct rcon_packet p;
-	memset(&p, 0, sizeof(struct rcon_packet));
+	rcon_init_packet(&p);
 
 	p.id = id++;
 

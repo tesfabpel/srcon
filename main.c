@@ -45,6 +45,15 @@ bool authenticate()
 	memcpy(&p.body, pwd, sz);
 	p.body[sz-1] = '\0';
 
+	rcon_prepare_packet(&p);
+	ssize_t sent = send(sockfd, &p, sizeof(p), 0);
+	if(sent < 0) return false;
+
+	struct rcon_packet recvp;
+	rcon_init_packet(&recvp);
+
+	ssize_t recvd = recv(sockfd, &recvp, sizeof(struct rcon_packet), 0);
+
 	return false;
 }
 
@@ -53,29 +62,53 @@ void loop()
 
 }
 
-void start_connection(char *ip, uint16_t port)
+void start_connection(char *addr, char *port)
 {
-	printf("Trying to connect to: %s:%d\n", ip, port);
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(sockfd < 0)
+	printf("Getaddrinfo\n");
+
+	struct addrinfo *result, *rp;
+	struct addrinfo hints;
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+	hints.ai_socktype = SOCK_DGRAM; /* Datagram socket */
+	hints.ai_flags = 0;
+	hints.ai_protocol = 0;          /* Any protocol */
+
+	int res = getaddrinfo(addr, port, &hints, &result);
+	if (res != 0)
 	{
-		//errno // TODO: Check?
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(res));
 		cleanup(EXIT_FAILURE);
 	}
 
-	// http://stackoverflow.com/questions/19071358/tcp-c-client-not-connecting-using-the-ip-address-you-entered
-	struct sockaddr_in connaddr;
-	memset(&connaddr, 0, sizeof(struct sockaddr_in));
-	connaddr.sin_family = AF_INET;
-	connaddr.sin_port = htons(port);
-	inet_pton(AF_INET, ip, &connaddr.sin_addr);
-
-	int cres = connect(sockfd, (struct sockaddr *)&connaddr, sizeof(connaddr));
-	if(cres < 0)
+	int sfd = 0;
+	for(rp = result; rp != NULL; rp = rp->ai_next)
 	{
-		fprintf(stderr, "Cannot establish connection\n");
+		//printf("Trying to connect to: %s\n", rp->ai_addr->sa_data);
+
+		sfd = socket(rp->ai_family, rp->ai_socktype,
+					 rp->ai_protocol);
+
+		if(sfd == -1) continue; // Try the next one
+
+		if(connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
+		{
+			// Success
+			break;
+		}
+
+		close(sfd);
+		sfd = 0;
+	}
+
+	if(rp == NULL)
+	{
+		// No address succeeded
+		fprintf(stderr, "Could not connect\n");
 		cleanup(EXIT_FAILURE);
 	}
+
+	sockfd = sfd;
 }
 
 int main(int argc, char *argv[])
@@ -88,13 +121,10 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	char *ip = argv[1];
-	char *port_s = argv[2];
-	uint16_t port;
-	int matched = sscanf(port_s, "%hu", &port);
-	if(matched != 1) cleanup(EXIT_FAILURE);
+	char *host = argv[1];
+	char *port = argv[2];
 
-	start_connection(ip, port);
+	start_connection(host, port);
 	if(sockfd < 0)
 	{
 		return -2;

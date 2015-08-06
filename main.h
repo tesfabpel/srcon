@@ -22,11 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/socket.h>
-//#include <bits/errno.h>
-#include <netdb.h>
+#include <bits/errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <netdb.h>
 
 #endif //SRCON_MAIN_H

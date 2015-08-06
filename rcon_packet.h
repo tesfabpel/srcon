@@ -38,7 +38,7 @@ struct rcon_packet
 };
 
 void rcon_init_packet(struct rcon_packet *p);
-struct rcon_packet rcon_crate_packet();
+struct rcon_packet rcon_create_packet();
 void rcon_prepare_packet(struct rcon_packet *p);
 
 #endif //SRCON_RCON_PACKET_H_H

@@ -26,7 +26,7 @@ void rcon_init_packet(struct rcon_packet *p)
 	memset(p, 0, sizeof(struct rcon_packet));
 }
 
-struct rcon_packet rcon_crate_packet()
+struct rcon_packet rcon_create_packet()
 {
 	struct rcon_packet p;
 	rcon_init_packet(&p);

@@ -37,7 +37,7 @@ bool authenticate()
 
 	char *pwd = readline("Password: ");
 
-	p = rcon_crate_packet();
+	p = rcon_create_packet();
 	p.type = RCON_TYPE_SERVERDATA_AUTH;
 
 	// Set the password. If this field is larger than sz, set the last char to \0
